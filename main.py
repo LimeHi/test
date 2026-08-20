@@ -3,6 +3,8 @@ import logging
 
 import aiohttp
 from aiogram import Bot, Dispatcher, Router, F
+from aiogram.client.session.aiohttp import AiohttpSession
+from aiogram.client.telegram import TelegramAPIServer
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -134,12 +136,21 @@ async def _start_job(message: Message, entries: list, custom_text: str):
         await status_msg.edit_text(f"В очереди. Позиция: {position}. Ожидай...")
 
 
+def build_bot():
+    if cfg.TELEGRAM_PROXY_HOST:
+        proxy_api = TelegramAPIServer.from_base(f"https://{cfg.TELEGRAM_PROXY_HOST}")
+        session = AiohttpSession(api=proxy_api)
+        session._connector_init["ssl"] = False
+        return Bot(token=cfg.BOT_TOKEN, session=session)
+    return Bot(token=cfg.BOT_TOKEN)
+
+
 async def main():
     global job_queue
     if not cfg.BOT_TOKEN:
         raise RuntimeError("BOT_TOKEN не задан в переменных окружения")
 
-    bot = Bot(token=cfg.BOT_TOKEN)
+    bot = build_bot()
     dp = Dispatcher()
     dp.include_router(router)
 

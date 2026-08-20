@@ -1,6 +1,7 @@
 import os
 
 BOT_TOKEN = os.getenv("BOT_TOKEN", "")
+TELEGRAM_PROXY_HOST = os.getenv("TELEGRAM_PROXY_HOST", "")
 
 # Максимум конфигов из одной подписки за раз
 MAX_CONFIGS = int(os.getenv("MAX_CONFIGS", "500"))
